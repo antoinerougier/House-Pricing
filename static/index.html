@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimation de prix immobilier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            grid-column: span 2;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Estimation de prix immobilier</h1>
+    <form id="houseForm">
+        <label for="GrLivArea">Surface habitable (GrLivArea) :</label>
+        <input type="number" id="GrLivArea" name="GrLivArea" required>
+
+        <label for="TotalBsmtSF">Surface sous-sol (TotalBsmtSF) :</label>
+        <input type="number" id="TotalBsmtSF" name="TotalBsmtSF" required>
+
+        <label for="OverallQual">Qualité globale (OverallQual) :</label>
+        <input type="number" id="OverallQual" name="OverallQual" min="1" max="10" required>
+
+        <label for="YearBuilt">Année de construction (YearBuilt) :</label>
+        <input type="number" id="YearBuilt" name="YearBuilt" min="1800" max="2026" required>
+
+        <label for="YearRemodAdd">Année de rénovation (YearRemodAdd) :</label>
+        <input type="number" id="YearRemodAdd" name="YearRemodAdd" min="1800" max="2026" required>
+
+        <label for="FirstFlrSF">Surface 1er étage (FirstFlrSF) :</label>
+        <input type="number" id="FirstFlrSF" name="FirstFlrSF" required>
+
+        <label for="SecondFlrSF">Surface 2ème étage (SecondFlrSF) :</label>
+        <input type="number" id="SecondFlrSF" name="SecondFlrSF" required>
+
+        <label for="FullBath">Nombre de salles de bain (FullBath) :</label>
+        <input type="number" id="FullBath" name="FullBath" min="0" required>
+
+        <label for="BedroomAbvGr">Nombre de chambres (BedroomAbvGr) :</label>
+        <input type="number" id="BedroomAbvGr" name="BedroomAbvGr" min="0" required>
+
+        <label for="GarageCars">Nombre de places de garage (GarageCars) :</label>
+        <input type="number" id="GarageCars" name="GarageCars" min="0" required>
+
+        <label for="TotRmsAbvGrd">Nombre total de pièces (TotRmsAbvGrd) :</label>
+        <input type="number" id="TotRmsAbvGrd" name="TotRmsAbvGrd" min="0" required>
+
+        <label for="Fireplaces">Nombre de cheminées (Fireplaces) :</label>
+        <input type="number" id="Fireplaces" name="Fireplaces" min="0" required>
+
+        <button type="submit">Estimer le prix</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('houseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                GrLivArea: parseFloat(document.getElementById('GrLivArea').value),
+                TotalBsmtSF: parseFloat(document.getElementById('TotalBsmtSF').value),
+                OverallQual: parseFloat(document.getElementById('OverallQual').value),
+                YearBuilt: parseFloat(document.getElementById('YearBuilt').value),
+                YearRemodAdd: parseFloat(document.getElementById('YearRemodAdd').value),
+                FirstFlrSF: parseFloat(document.getElementById('FirstFlrSF').value),
+                SecondFlrSF: parseFloat(document.getElementById('SecondFlrSF').value),
+                FullBath: parseFloat(document.getElementById('FullBath').value),
+                BedroomAbvGr: parseFloat(document.getElementById('BedroomAbvGr').value),
+                GarageCars: parseFloat(document.getElementById('GarageCars').value),
+                TotRmsAbvGrd: parseFloat(document.getElementById('TotRmsAbvGrd').value),
+                Fireplaces: parseFloat(document.getElementById('Fireplaces').value),
+            };
+
+            try {
+                const response = await fetch('http://localhost:8000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur : ${response.status}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h2>Résultat de l'estimation</h2>
+                    <p>Prix estimé : <strong>${data.estimated_price.toLocaleString()} €</strong></p>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h2>Erreur</h2>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
