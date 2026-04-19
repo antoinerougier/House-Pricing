@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: house-pricing-api
+spec:
+  replicas: 3  # Nombre de pods réplicats
+  selector:
+    matchLabels:
+      app: house-pricing-api
+  template:
+    metadata:
+      labels:
+        app: house-pricing-api
+    spec:
+      containers:
+      - name: house-pricing-api
+        image: antoinerougier77/house-pricing-api:latest  # Ton image Docker Hub
+        ports:
+        - containerPort: 8000  # Le port exposé par ton conteneur
